@@ -1,10 +1,7 @@
 const { normalize, schema, denormalize } = require('normalizr')
 
-
 const messageSchema = new schema.Entity('messages', {}, {idAttribute: 'timestamp'})
-
 const userSchema = new schema.Entity('users', {}, {idAttribute: 'email'})
-
 const chat = [
   {
     user: userSchema,

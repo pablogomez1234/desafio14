@@ -1,44 +1,44 @@
-const express = require('express')
+const { Router } = require('express')
+const sessionRouter = Router() 
+
 const passport = require('passport')
 require('../middlewares/auth')
-
-const { Router } = express   
-const sessionRouter = Router() 
 
 const { logger, loggererr } = require('../log/logger')
 
 
 /* ------------------ router session ----------------- */
 //--------------------- usuario logeado?
-sessionRouter.get('/', (req, res) => {
-  if (req.session.passport) {
-    console.log (req.session)
-    //req.session.cookie._expires = new Date(Date.now() + 60000)
-    //req.session.save()
-    logger.info(`Usuario ${req.session.passport.user} logeado`)
-    res.status(200).send({ user: req.session.passport.user })
-  } else {
-    logger.warn(`No hay usuario logeado`) 
-    res.status(401).send({ user: '' })
+sessionRouter.get(
+  '/',
+  (req, res) => {
+    if (req.session.passport) {
+      logger.info(`Usuario ${req.session.passport.user} logeado`)
+      res.status(200).send({ user: req.session.passport.user })
+    } else {
+      logger.warn(`No hay usuario logeado`) 
+      res.status(401).send({ user: '' })
+    }
   }
-})
+)
 
 
 //--------------------- post login user
 sessionRouter.post(
   '/login', 
   passport.authenticate('login'),
-  function(req, res) {
+  function(_, res) {
     logger.info(`Autenticacion exitosa`)
     res.status(200).send({ message: 'Autenticación exitosa.' })
   }
 )
 
+
 //--------------------- post login/register user with google
 sessionRouter.post(
   '/logingoogle', 
   passport.authenticate('googleauth'),
-  function(req, res) {
+  function(_, res) {
     logger.info(`Autenticacion con Google exitosa`)
     res.status(200).send({ message: 'Autenticación exitosa.' })
   }
@@ -57,17 +57,20 @@ sessionRouter.post(
 
 
 //------------ get cerrar sesion
-sessionRouter.post('/logout', async (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      loggererr.error(`No se ha podido cerrar la sesion, error: ${error}`)
-      res.status(500).send(`Something terrible just happened!!!`)
-    } else {
-      logger.info(`Sesion cerrada.`)
-      res.redirect('/')
-    }
-  })
-})
+sessionRouter.post(
+  '/logout',
+  async (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        loggererr.error(`No se ha podido cerrar la sesion, error: ${error}`)
+        res.status(500).send(`Something terrible just happened!!!`)
+      } else {
+        logger.info(`Sesion cerrada.`)
+        res.redirect('/')
+      }
+    })
+  }
+)
 
 
 module.exports = sessionRouter
